@@ -22,6 +22,22 @@ function normalizeUnits(manifest) {
   };
 }
 
+function validateManifest(manifest) {
+  const errors = {};
+  const requiredFields = [
+    "containerId",
+    "destination",
+    "weight",
+    "unit",
+    "hazmat",
+  ];
+  requiredFields.forEach((field) => {
+    if (!(field in manifest)) {
+      errors[field] = "Missing";
+    }
+  });
+}
+
 let manifest = {
   containerId: 1,
   destination: "Monterey, California, USA",
