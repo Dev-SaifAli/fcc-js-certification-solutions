@@ -24,25 +24,55 @@ function normalizeUnits(manifest) {
 
 function validateManifest(manifest) {
   const errors = {};
-  const requiredFields = [
-    "containerId",
-    "destination",
-    "weight",
-    "unit",
-    "hazmat",
-  ];
+  const requiredFields = ["containerId", "destination", "weight", "unit", "hazmat"];
+
   requiredFields.forEach((field) => {
+    // 1. Check for Missing
     if (!(field in manifest)) {
       errors[field] = "Missing";
+    } 
+    // 2. Check for Invalid
+    else {
+      let isInvalid = false;
+
+      // Rule: containerId must be an Integer and > 0
+      if (field === "containerId" && (!Number.isInteger(manifest[field]) || manifest[field] <= 0)) {
+        isInvalid = true;
+      } 
+      else if (field === "destination" && typeof manifest[field] !== "string") {
+        isInvalid = true;
+      } 
+      else if (field === "weight" && (typeof manifest[field] !== "number" || manifest[field] <= 0)) {
+        isInvalid = true;
+      } 
+      else if (field === "unit" && !["kg", "lb"].includes(manifest[field])) {
+        isInvalid = true;
+      } 
+      else if (field === "hazmat" && typeof manifest[field] !== "boolean") {
+        isInvalid = true;
+      }
+
+      if (isInvalid) {
+        errors[field] = "Invalid";
+      }
     }
   });
+
+  return errors;
 }
 
-let manifest = {
-  containerId: 1,
-  destination: "Monterey, California, USA",
-  weight: 831,
-  unit: "kg",
-  hazmat: false,
-};
-console.log(normalizeUnits(manifest));
+function processManifest(manifest) {
+  const errors = validateManifest(manifest);
+  const { containerId } = manifest;
+
+  if (Object.keys(errors).length > 0) {
+    console.log(`Validation error: ${manifest.containerId}`);
+    return;
+  }
+
+  console.log(`Validation success: ${containerId}`);
+
+  const normalized = normalizeUnits(manifest);
+  console.log(`Total weight: ${normalized.weight} kg`);
+}
+
